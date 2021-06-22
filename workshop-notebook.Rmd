@@ -1,19 +1,315 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Penguin Plotting"
+output: pdf_document
 ---
 
-This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
 
-Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+## Penguin Plotting
+
+
+For today's coding club, we're going to dive into making data visualizations with the ggplot package and penguin data. The "gg" translates to "grammar of graphics", and is founded in the idea that all data visualizations are comprised of three components:
+
+* data set
+* aesthetics, or visual marks that represent the data (i.e. the stuff that you see)
+* geometric objects, or "geoms" (e.g the type of plot)
+
+ggplot isn't the only way to create plots in R, but it's used a fair amount, and is part of the "tidyverse". 
+
+
+So, let's start by loading the tidyverse, and looking at our penguins dataset again:
 
 ```{r}
-plot(cars)
+library(tidyverse)
+library(palmerpenguins)
+
+#As a quick refresher, let's look at the penguins data frame:
+penguins
 ```
 
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+First, let's look at the components of a ggplot visualization.
 
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+ggplot() works by “adding” together layers.
 
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+* The first layer is always ggplot().
+* The next layer can be a geom_* function, which controls the type of plot made.
+** geom_point() is used to make a scatterplot
+
+many other functions exist (see ggplot-cheat-sheet.pdf)
+
+We need to provide:
+
+* The "mapping=aes()" command that specifies the variables used as the x and/or y values
+* A "data=" argument that specifies the data frame or tibble containing the necessary variables.
+
+Let's slowly build our first scatterplot, looking at the relationship between flipper length (flipper_length_mm) and body mass (body_mass_g).
+
+First, let's start with the ggplot() function:
+
+```{r}
+
+ggplot()
+
+
+```
+
+By itself, it doesn't do very much. Let's add the dataset using "data=...", and our x & y parameters using "mapping=aes(...)":
+
+```{r}
+
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g
+    )
+  )
+
+```
+
+This looks a little better, sort of. Our x & y axes are defined, plus we have some measurement ranges. The last thing we need to do is tell ggplot what kind of plot to use, by adding the geom_point() function:
+
+```{r}
+
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g
+    )
+  )+
+  geom_point()
+
+
+```
+
+Notice we get a warning about missing values. How might we address that?
+
+
+YOUR TURN:
+
+Create a scatterplot showing the relationship between bill length and bill depth:
+
+```{r}
+
+
+
+```
+
+Create a scatterplot showing the relationship between bill length and flipper length:
+
+```{r}
+
+
+
+
+```
+
+
+
+We can add a "line of best fit" to our scatterplot by adding the geom_smooth() function:
+
+```{r}
+
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g
+    )
+  )+
+  geom_point()+
+  geom_smooth(
+    method='lm', 
+    formula= y~x
+    )
+
+```
+
+
+YOUR TURN:
+
+Add lines of best fit to the scatterplots you just created:
+
+```{r}
+
+#relationship between bill length and bill depth
+
+
+```
+
+
+
+```{r}
+
+# relationship between bill length and flipper length
+
+
+```
+
+
+We can also leverage our dataset to show differences in the data among penguin species, but adding the "color" and "shape" attributes to our aesthetics:
+
+```{r}
+
+
+
+#color:
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g, 
+    color=species)
+  )+
+  geom_point()
+
+#color & shape:
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g, 
+    color=species, 
+    shape=species)
+  )+
+  geom_point()
+
+
+```
+
+We can also improve the visualization by changing the labels:
+
+```{r}
+
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g, 
+    color=species, 
+    shape=species)
+  )+
+  geom_point()+
+  labs(
+    title="Body mass x flipper length of Palmer Penguins",
+    x="Flipper length (mm)", 
+    y="Body Mass (g)"
+    )
+
+
+```
+
+
+
+YOUR TURN:
+
+Add labels to your plots.
+
+```{r}
+
+
+
+
+```
+
+
+Global vs local:
+
+Let's see what happens when we add our "geom_smooth" back to the plot:
+
+```{r}
+
+ggplot(
+  data=penguins, 
+  mapping=aes(
+    x=flipper_length_mm, 
+    y=body_mass_g, 
+    color=species, 
+    shape=species)
+  )+
+  geom_point()+
+  labs(
+    title="Body mass x flipper length of Palmer Penguins", 
+    x="Flipper length (mm)", 
+    y="Body Mass (g)"
+    )+
+  geom_smooth(
+    method = "lm", 
+    formula = y~x
+    )
+
+
+```
+
+This creates a line of best fit for each of the species types. Maybe this is fine (?), but let's say we want to still have our colors and shapes by species, AND we want just one line of best fit for all data points. We can accomplish this by taking advantage of "global" vs "local" parameters in ggplot. 
+
+Basically, if we put our data & mapping attributes in the initial ggplot() function, then those parameters act globally (e.g. apply to all additional chained functions). But we can make things more specific to each type of geom_ function by declaring those attributes in the geom_ functions themselves:
+
+
+```{r}
+
+#First, without the geom_smooth. 
+
+#Notice the attributes have been moved to the geom_point function
+
+ggplot( )+
+  geom_point(
+    data=penguins, 
+    mapping=aes(
+      x=flipper_length_mm, 
+      y=body_mass_g, 
+      color=species, 
+      shape=species
+      )
+    )+
+  labs(
+    title="Body mass x flipper length of Palmer Penguins", 
+    x="Flipper length (mm)", 
+    y="Body Mass (g)"
+    )
+
+
+
+```
+
+```{r}
+
+#Now we chain on geom_smooth, but get specific about our data and mapping within that function...there is no shape/color parameter, so it makes the line of best fit over all the data
+
+ggplot()+
+  geom_point(
+    data=penguins, 
+    mapping=aes(
+      x=flipper_length_mm, 
+      y=body_mass_g, 
+      color=species, 
+      shape=species)
+    )+
+  labs(
+    title="Body mass x flipper length of Palmer Penguins", 
+    x="Flipper length (mm)", 
+    y="Body Mass (g)"
+    )+
+  geom_smooth(
+    data=penguins, 
+    mapping=aes(
+      x=flipper_length_mm, 
+      y=body_mass_g
+      ),
+    method='lm', 
+    formula= y~x
+    )
+
+```
+
+
+YOUR TURN:
+
+Adjust your plot showing flipper length x bill length so it differentates by species, but has a line of best fit through all the data points.
+
+```{r}
+
+```
+
+
 
