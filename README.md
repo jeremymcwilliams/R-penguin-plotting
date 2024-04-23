@@ -1,7 +1,7 @@
 # LC Summer Coding Club with R - week 4
 ## Penguin Plotting
 
-
+[![DOI](https://zenodo.org/badge/379084094.svg)](https://zenodo.org/doi/10.5281/zenodo.11050989)
 
 ### For use with Lewis & Clark's RStudio Server
 
